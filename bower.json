@@ -1,0 +1,36 @@
+{
+  "name": "riot-md-table",
+  "version": "0.0.3",
+  "description": "Table component, for Riot.js",
+  "authors": [
+    {
+      "name": "Luke Edwards",
+      "email": "luke@lukeed.com",
+      "homepage": "https://lukeed.com"
+    }
+  ],
+  "keywords": [
+    "riot",
+    "riotjs",
+    "riot-tag",
+    "table"
+  ],
+  "main": "src/md-table.tag",
+  "moduleType": [
+    "amd"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/hiperpixel/riot-table/",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "package.json",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "riot": "^2.3.0"
+  },
+  "devDependencies": {}
+}
