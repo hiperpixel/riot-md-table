@@ -6,7 +6,7 @@
 	<table name="el" class="{opts.class}">
 		<thead>
 			<tr name="labels">
-				<th each="{ c in tags['riot-table-col'] }" onclick="{ c.opts.sorter ? sort_column : ''}"
+				<th each="{ c in tags['riot-table-col'] }" onclick="{ c.opts.sorter ? sortColumn : ''}"
 					data-order="{ c.opts.sorter ? c.opts.order || 'asc' : '' }"
 					data-key="{ c.opts.key }" style="width: { c.opts.width || 'auto' }"
 					class="{c.opts.sorter ? 'sortable': '' }">
@@ -202,7 +202,7 @@
 			});
 		};
 
-		self.sort_column = function(e)
+		self.sortColumn = function(e)
 		{
 			var th = e.target;
 			var key = th.getAttribute('data-key');
@@ -243,10 +243,10 @@
 				self.sortees = disabled ? [] : [{key:key, dir:next_dir}];
 			}
 
-			sort_data();
+			sortData();
 		}
 
-		function sort_data()
+		function sortData()
 		{
 			var sort_function;
 
@@ -310,7 +310,7 @@
 		self.on('update', function ()
 		{
 			// TODO find a way to prevent too many unecessary draws
-			sort_data();
+			sortData();
 			self.drawRows();
 		});
 

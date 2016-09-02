@@ -1,4 +1,4 @@
-riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" onkeyup="{onKeyup}"> <table name="el" class="{opts.class}"> <thead> <tr name="labels"> <th each="{c in tags[\'riot-table-col\']}" onclick="{c.opts.sorter ? sort_column : \'\'}" data-order="{c.opts.sorter ? c.opts.order || \'asc\' : \'\'}" data-key="{c.opts.key}" riot-style="width: {c.opts.width || \'auto\'}" class="{c.opts.sorter ? \'sortable\': \'\'}"> {c.opts.label} <span class="sort_dir" if="{c.parent.keyIsSortee(c.opts.key)}"> <span class="dir_{c.parent.dirOfSortee(c.opts.key)}"> <span>{c.parent.dirOfSortee(c.opts.key)}</span> </span> <span class="order" if="{c.parent.opts.multicolumn}"> <span>{c.parent.idOfSortee(c.opts.key) + 1}</span> </span> </span> </th> </tr> </thead> <tbody name="tbody"></tbody> </table>', '', '', function(opts) {
+riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" onkeyup="{onKeyup}"> <table name="el" class="{opts.class}"> <thead> <tr name="labels"> <th each="{c in tags[\'riot-table-col\']}" onclick="{c.opts.sorter ? sortColumn : \'\'}" data-order="{c.opts.sorter ? c.opts.order || \'asc\' : \'\'}" data-key="{c.opts.key}" riot-style="width: {c.opts.width || \'auto\'}" class="{c.opts.sorter ? \'sortable\': \'\'}"> {c.opts.label} <span class="sort_dir" if="{c.parent.keyIsSortee(c.opts.key)}"> <span class="dir_{c.parent.dirOfSortee(c.opts.key)}"> <span>{c.parent.dirOfSortee(c.opts.key)}</span> </span> <span class="order" if="{c.parent.opts.multicolumn}"> <span>{c.parent.idOfSortee(c.opts.key) + 1}</span> </span> </span> </th> </tr> </thead> <tbody name="tbody"></tbody> </table>', '', '', function(opts) {
 		this.mixin(EventHub);
 
 		var self = this,
@@ -130,7 +130,7 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 			});
 		};
 
-		self.sort_column = function(e)
+		self.sortColumn = function(e)
 		{
 			var th = e.target;
 			var key = th.getAttribute('data-key');
@@ -171,10 +171,10 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 				self.sortees = disabled ? [] : [{key:key, dir:next_dir}];
 			}
 
-			sort_data();
+			sortData();
 		}
 
-		function sort_data()
+		function sortData()
 		{
 			var sort_function;
 
@@ -228,7 +228,7 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 		self.on('update', function ()
 		{
 
-			sort_data();
+			sortData();
 			self.drawRows();
 		});
 
