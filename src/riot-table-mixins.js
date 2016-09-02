@@ -1,3 +1,3 @@
-var RiotTableMixin = {
+var EventHub = {
     observable: riot.observable()
 };
