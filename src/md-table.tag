@@ -1,4 +1,4 @@
-<md-table>
+<riot-table>
 	<yield />
 
 	<input if="{ opts.search }"
@@ -7,7 +7,7 @@
 	<table name="el" class="{opts.class}">
 		<thead>
 			<tr name="labels">
-				<th each="{ c in tags['md-table-col'] }" onclick="{ sortMulti }"
+				<th each="{ c in tags['riot-table-col'] }" onclick="{ sortMulti }"
 					data-order="{ c.opts.sorter ? c.opts.order || 'asc' : '' }"
 					data-key="{ c.opts.key }" style="width: { c.opts.width || 'auto' }">
 					{ c.opts.label }
@@ -23,7 +23,7 @@
 	</table>
 
 	<script>
-		this.mixin(SharedMixin);
+		this.mixin(RiotTableMixin);
 
 		var self = this,
 			doc = document,
@@ -303,13 +303,13 @@
 		}
 
 		/**
-		 * On Init, Prepare & Collect `md-table-col` stats
+		 * On Init, Prepare & Collect `riot-table-col` stats
 		 */
 		self.on('mount', function () {
 			self.cols = [].slice.call(self.labels.children); // get `<th>` after loop runs
 
 			// save the columns' datakeys & widths. will be used for `<td>` childs
-			self.tags['md-table-col'].forEach(function (c) {
+			self.tags['riot-table-col'].forEach(function (c) {
 				var k = c.opts.key;
 
 				self.keys.push(k);
@@ -320,7 +320,7 @@
 				// has a sorter method?
 				self.sorters[k] = c.opts.sorter || false;
 
-				// remove the `<md-table-col>` tags from DOM, useless now
+				// remove the `<riot-table-col>` tags from DOM, useless now
 				self.root.removeChild(c.root);
 			});
 
@@ -337,7 +337,7 @@
 		 * On `update`, draw the tablerows if has new data
 		 */
 		self.on('update', function () {
-			console.warn('inside `md-table` update');
+			console.warn('inside `riot-table` update');
 			if (self.keys.length && opts.data.length > self.rows.length) {
 				self.drawRows();
 			}
@@ -347,4 +347,4 @@
 			console.log(key, constraints);
 		});
 	</script>
-</md-table>
+</riot-table>

@@ -1,3 +1,3 @@
-<md-table-col style="display: none;">
+<riot-table-col style="display: none;">
   <yield />
-</md-table-col>
+</riot-table-col>
