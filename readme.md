@@ -1,5 +1,5 @@
-# riot-md-table
-> Material Design table component, for Riot.js
+# riot-table
+> ~~Material Design~~ table component, for Riot.js
 
 #### Work In Progress / Incomplete
 
@@ -159,7 +159,7 @@ The `key` corresponds to a `data` object key. **Required if** the column is mean
 > Options: `asc` or `desc` <br>
 > Required: `false`
 
-The first direction when sorting. 
+The first direction when sorting.
 
 For example, if `desc`, the first click on `<th>` will sort the column values in _descending_ order. The second click will sort the values in _ascending_ order.
 
