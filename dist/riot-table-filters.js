@@ -1,25 +1,25 @@
-riot.tag2('riot-table-filter-boolean', '<div class="filter"> <label for="{opts.as}"> {opts.label} <input type="checkbox" name="{opts.as}" onclick="{clicked}"> </label> </div>', '', '', function(opts) {
-        this.mixin(RiotTableMixin);
+riot.tag2('riot-table-filter-boolean', '<div class="filter"> <div class="filter_active"><span>Active</span><input type="checkbox" name="_active" onclick="{clicked}"></div> <label for="{opts.as}"> {opts.label} <input type="checkbox" name="{opts.as}" onclick="{clicked}"> </label> </div>', '', '', function(opts) {
+        this.mixin(EventHub);
 
-        this.on('mount', function(){
+        this.on('mount', function()
+        {
             this[opts.as].checked = !!this.opts.value;
-        })
+        });
+
         this.clicked = function(e)
         {
-            this.observable.trigger('filter', opts.key, this[opts.as].checked);
+            this.observable.trigger('filter', opts.as, this);
         }.bind(this)
-});
 
-
-
-riot.tag2('riot-table-filter-range', '<div class="filter"> <label for="{opts.as}">{opts.label}</label> <input name="{opts.as}1" onchange="{changed}" min="{opts.min}" max="opts.max" step="{opts.step}" type="number"> <input name="{opts.as}2" onchange="{changed}" min="{opts.min}" max="opts.max" step="{opts.step}" type="number"> </div>', '', '', function(opts) {
-        this.mixin(RiotTableMixin);
-
-        this.on('mount', function(){
-        })
-
-        this.clicked = function(e)
+        this.exec = function(data)
         {
-            this.observable.trigger('filter', opts.key, this[opts.as].checked);
+            return data.filter(function(e)
+            {
+                if (this['_active'].checked)
+                {
+                    return e[this.opts.key] == this[opts.as].checked;
+                }
+                return true;
+            }, this);
         }.bind(this)
 });
