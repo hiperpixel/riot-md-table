@@ -1,6 +1,6 @@
 {
-  "name": "riot-md-table",
-  "version": "0.0.3",
+  "name": "riot-table",
+  "version": "0.0.3-alpha",
   "description": "Table component, for Riot.js",
   "authors": [
     {
