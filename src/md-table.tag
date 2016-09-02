@@ -4,13 +4,17 @@
 	<input if="{ opts.search }"
 		type="text" onkeyup="{ onKeyup }">
 
-	<table name="el" class="md-table">
+	<table name="el" class="{opts.class}">
 		<thead>
 			<tr name="labels">
-				<th each="{ c in tags['md-table-col'] }" onclick="{ sortTable }"
-					data-order="{ c.opts.order || 'asc' }"
+				<th each="{ c in tags['md-table-col'] }" onclick="{ sortMulti }"
+					data-order="{ c.opts.sorter ? c.opts.order || 'asc' : '' }"
 					data-key="{ c.opts.key }" style="width: { c.opts.width || 'auto' }">
-					{ c.opts.label } <i></i>
+					{ c.opts.label }
+					<span class="subsup">
+						<sup></sup>
+						<sub>{ c.parent.opts.multicolumn ? c.parent.sortees.indexOf(c.opts.key) > -1 ? c.parent.sortees.indexOf(c.opts.key) + 1 : '' : '' }</sub>
+					</span>
 				</th>
 			</tr>
 		</thead>
@@ -19,6 +23,8 @@
 	</table>
 
 	<script>
+		this.mixin(SharedMixin);
+
 		var self = this,
 			doc = document,
 			rowClick = opts.onclick,
@@ -31,6 +37,8 @@
 		self.builders = {}; // cols render methods
 		self.sorters = {}; // cols sorting methods
 		self.selected = null; // selected row item
+
+		self.sortees = []; // orders for multicolumn sort
 
 		/**
 		 * Draw all table rows within `opts.data`
@@ -165,81 +173,133 @@
 			});
 		};
 
-		/**
-		 * Sort the Table rows by `<th>`s `data-key`
-		 * @param  {Event} e
-		 */
-		self.sortTable = function (e) {
+
+		self.sortMulti = function(e) {
 			var th = e.target,
 				key = th.getAttribute('data-key'),
 				sorter = self.sorters[key];
 
-			// no `data-key` or sorter method? do nothing
-			if (!key || !sorter) {
-				return;
+			var sorted = th.getAttribute('data-sort');
+			var order_sequence = ['asc', 'desc'];
+			if(th.getAttribute('data-order') === 'desc')
+				order_sequence.reverse();
+			if(opts.multicolumn)
+				order_sequence.push('none');
+
+			var order_actual = sorted ? order_sequence.indexOf(sorted) : -1;
+			var next_state = ((order_actual + 1) % order_sequence.length);
+			var order = order_sequence[next_state];
+
+			if(opts.multicolumn)
+			{
+				var index = self.sortees.indexOf(key);
+				if(index >= 0)
+					self.sortees.splice(index, 1);
+
+				if(order != 'none')
+					self.sortees.push(key);
+
+				th.setAttribute('data-sort', order);
+			}
+			else
+			{
+				self.sortees = [key];
+
+				self.cols.forEach(function (el, i) {
+					if (i === self.actionsCol) {
+						return;
+					}
+					if (el === th) {
+						el.setAttribute('data-sort', order);
+					} else {
+						el.removeAttribute('data-sort');
+					}
+				});
 			}
 
-			var sorted = th.getAttribute('data-sort'),
-				// if there's already a `sorted`, do opposite, else default to `asc`
-				order = sorted ? ((sorted === 'asc') ? 'desc' : 'asc') : th.getAttribute('data-order');
-			console.log('new order: ', order);
-
-			// "asynchronously" sort the table; frees up main thread a bit
-			return setTimeout(function () {
-				handleSort(th, order, sorter);
-			}, 1);
-		};
-
-		/**
-		 * Perform the sorting function
-		 * @param  {Node} th           The clicked `<th>` element
-		 * @param  {String} order      The sorting direction, 'asc|desc'
-		 * @param  {Function} sorter   The column's sorting function
-		 */
-		function handleSort(th, order, sorter) {
-			console.time('handleSort');
-			var idx = th.cellIndex;
-
-			// Extract each row's `key` value && pair it with its `<tr>` as a tuple.
-			// This way sorting the values will incidentally sort the body rows.
-			var column = self.rows.map(function (tr, i) {
-				return [tr.children[idx].value, tr];
-			});
-
-			// Sort by the column's `key` value
-			column.sort(function (a, b) {
-				return sorter(a[0], b[0]);
-			});
-
-			// Reverse sorted array if not `asc`, which was assumed
-			if (order === 'desc') {
-				column.reverse();
+			function find_cols_indexes()
+			{
+				var idx = [];
+				self.sortees.forEach(function(e){
+					idx.push(
+						self.cols.findIndex(function(v){
+							return v.getAttribute('data-key') == e;
+						})
+					);
+				});
+				return idx;
 			}
 
-			// Replace `self.rows` with the sorted rows.
-			self.rows = column.map(function (tup) {
-				return tup[1]; // `<tr>` is 2nd item of tuple
+			function get_col_direction(name)
+			{
+				return self.cols.find(function(v){
+					return v.getAttribute('data-key') == name;
+				}).getAttribute('data-sort');
+			}
+
+			function get_cols_directions()
+			{
+				dir = []
+				self.sortees.forEach(function(e) {
+					dir.push(get_col_direction(e));
+				});
+				return dir;
+			}
+
+			function extract_row(j, idx)
+			{
+				var r = [];
+				r['element'] = self.rows[j];
+				idx.forEach(function(v, i){
+					r[self.sortees[i]] = ( self.rows[j].children[v].value );
+				});
+				return r;
+			}
+
+			cols = find_cols_indexes();
+			cols_dirs = get_cols_directions();
+			rows = [];
+			for (i=0;i<self.rows.length;i++)
+			{
+				rows.push(extract_row(i, cols))
+			}
+
+			// TODO: fuse cols and cols_dirs into a named array {key:{idx:i, dir:d}}
+
+			// console.log(self.sortees);
+			// console.log(cols);
+			// console.log(cols_dirs);
+			// console.log(rows);
+
+			// SORT
+
+			var sort_function;
+
+			self.sortees.forEach(function(e, i){
+				var opts = [];
+
+				opts['direction'] = (cols_dirs[i] == 'desc' ? -1 : 1);
+
+				if( i == 0 ){
+					sort_function = firstBy(self.sorters[e], opts);
+				} else {
+					sort_function = sort_function.thenBy(self.sorters[e], opts);
+				}
 			});
 
+			sorted = rows.sort(sort_function);
+
+			self.rows = sorted.map(function (e) {
+				return e['element']; // `<tr>` is 2nd item of tuple
+			});
+
+			// REPLENISH TABLE
 			// Write to `<tbody` without duplicating
 			console.time('re-append');
 			self.rows.forEach(function (el) {
 				self.tbody.appendChild(el);
 			});
 			console.timeEnd('re-append');
-
-			// Reset all `<th>`s except current
-			self.cols.forEach(function (el, i) {
-				if (i === self.actionsCol) {
-					return;
-				}
-				if (el === th) {
-					el.setAttribute('data-sort', order);
-				} else {
-					el.removeAttribute('data-sort');
-				}
-			});
-			console.timeEnd('handleSort');
 		}
 
 		/**
@@ -282,9 +342,9 @@
 				self.drawRows();
 			}
 		});
-	</script>
 
-	<style>
-		@import "md-table.sass";
-	</style>
+		this.observable.on('filter', function(key, constraints){
+			console.log(key, constraints);
+		});
+	</script>
 </md-table>
