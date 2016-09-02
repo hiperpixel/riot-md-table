@@ -206,7 +206,7 @@
 		{
 			var th = e.target;
 			var key = th.getAttribute('data-key');
-			var sorted = self.dirOfSortee(key);
+			var curr_dir = self.dirOfSortee(key);
 			var dir_sequence = ['asc', 'desc'];
 
 			if(!self.sorters[key])
@@ -219,7 +219,7 @@
 				dir_sequence.reverse();
 			}
 
-			var curr_dir_idx = sorted ? dir_sequence.indexOf(sorted) : -1;
+			var curr_dir_idx = curr_dir ? dir_sequence.indexOf(curr_dir) : -1;
 			var next_dir_idx = ((curr_dir_idx + 1) % dir_sequence.length);
 			var next_dir = dir_sequence[next_dir_idx];
 			var disabled = curr_dir_idx + 1 == dir_sequence.length;
