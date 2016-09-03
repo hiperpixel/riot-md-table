@@ -249,8 +249,6 @@
 			{
 				self.sortees = disabled ? [] : [{key:key, dir:next_dir}];
 			}
-
-			self.update();
 		}
 
 		function sortData(data)

@@ -172,8 +172,6 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 			{
 				self.sortees = disabled ? [] : [{key:key, dir:next_dir}];
 			}
-
-			self.update();
 		}
 
 		function sortData(data)
