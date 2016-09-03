@@ -17,7 +17,14 @@
 
         clicked(e)
         {
-            this.observable.trigger('filter', opts.as, this);
+            if (this['_active'].checked)
+            {
+                this.observable.trigger('filter_on', opts.as, this);
+            }
+            else
+            {
+                this.observable.trigger('filter_off', opts.as);
+            }
         }
 
         exec(data)

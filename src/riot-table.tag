@@ -29,6 +29,11 @@
 	<script>
 		this.mixin(EventHub);
 
+		// TODO remove the search function from this component and implement it as a filter
+		// TODO strategy for pagination, must be an external component just as the filters
+		// TODO fix the selected rows
+
+
 		var self = this,
 			doc = document,
 			rowClick = opts.onclick,
@@ -42,6 +47,7 @@
 		self.selected = null; // selected row item
 		self.visible_rows = []; // data to display
 		self.sortees = []; // what columns to sort
+		self.filters = []; // enabled filters list
 
 		/**
 		* Get the id of the column in the sortee array
@@ -80,11 +86,11 @@
 				self.tbody.removeChild(self.tbody.firstChild);
 			}
 
-			self.visible_rows.forEach(function (row, i)
+			for(var i = 0; i< self.visible_rows.length ; i++)
 			{
-				var item = self.drawRow(row, i)
+				var item = self.drawRow(self.visible_rows[i], i)
 				self.tbody.appendChild(item);
-			});
+			}
 		};
 
 		/**
@@ -119,13 +125,14 @@
 		function drawCells(tr, data)
 		{
 			// loop thru keys
-			self.keys.forEach(function (key)
+			for(var i = 0; i < self.keys.length; i++)
 			{
+				var key = self.keys[i];
 				var td = doc.createElement('td');
 				td.width = self.widths[key];
 				td.innerHTML = '<div>' + buildCell(key, data) + '</div>';
 				tr.appendChild(td); // add this `<td>` to the `<tr>`
-			});
+			}
 		}
 
 		/**
@@ -243,30 +250,46 @@
 				self.sortees = disabled ? [] : [{key:key, dir:next_dir}];
 			}
 
-			sortData();
+			self.update();
 		}
 
-		function sortData()
+		function sortData(data)
 		{
 			var sort_function;
+			var ret = data.slice(0);
 
-			self.sortees.forEach(function(e, i)
+			if(self.sortees.length > 0)
 			{
-				var opts = [];
-
-				opts['direction'] = (e.dir == 'desc' ? -1 : 1);
-
-				if( i == 0 )
+				self.sortees.forEach(function(e, i)
 				{
-					sort_function = firstBy(self.sorters[e.key], opts);
-				}
-				else
-				{
-					sort_function = sort_function.thenBy(self.sorters[e.key], opts);
-				}
-			});
+					var opts = [];
 
-			self.visible_rows.sort(sort_function);
+					opts['direction'] = (e.dir == 'desc' ? -1 : 1);
+
+					if( i == 0 )
+					{
+						sort_function = firstBy(self.sorters[e.key], opts);
+					}
+					else
+					{
+						sort_function = sort_function.thenBy(self.sorters[e.key], opts);
+					}
+				});
+
+				ret.sort(sort_function);
+			}
+
+			return ret;
+		}
+
+		function filterData(data)
+		{
+			var ret = data.slice(0);
+			for(var label in self.filters)
+			{
+				ret = self.filters[label].exec(ret);
+			}
+			return ret;
 		}
 
 		/**
@@ -299,8 +322,6 @@
 				self.actionsCol = parseInt(opts.actions);
 			}
 
-			self.visible_rows = opts.data;
-
 			self.update();
 		});
 
@@ -310,17 +331,32 @@
 		self.on('update', function ()
 		{
 			// TODO find a way to prevent too many unecessary draws
-			sortData();
+			// NOTE is self.visible_rows really necessary?
+			console.time('Updating...');
+			self.visible_rows = sortData( filterData( opts.data ) );
 			self.drawRows();
+			console.timeEnd('Updating...');
 		});
 
-		this.observable.on('filter', function(label, filter)
+		this.observable.on('filter_on', function(label, filter)
 		{
-			if(opts.filters.indexOf(label)>-1)
+			if(opts.filters.indexOf(label) > -1)
 			{
-				self.visible_rows = filter.exec(opts.data);
+				if(!self.filters[label])
+					self.filters[label] = filter;
+
 				self.update();
 			}
 		});
+
+		this.observable.on('filter_off', function(label)
+		{
+			if(opts.filters.indexOf(label) > -1 && self.filters[label])
+			{
+				delete self.filters[label];
+				self.update();
+			}
+		});
+
 	</script>
 </riot-table>

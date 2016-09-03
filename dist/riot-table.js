@@ -14,6 +14,7 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 		self.selected = null;
 		self.visible_rows = [];
 		self.sortees = [];
+		self.filters = [];
 
 		self.idOfSortee = function (key)
 		{
@@ -40,11 +41,11 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 				self.tbody.removeChild(self.tbody.firstChild);
 			}
 
-			self.visible_rows.forEach(function (row, i)
+			for(var i = 0; i< self.visible_rows.length ; i++)
 			{
-				var item = self.drawRow(row, i)
+				var item = self.drawRow(self.visible_rows[i], i)
 				self.tbody.appendChild(item);
-			});
+			}
 		};
 
 		self.drawRow = function (data, idx)
@@ -66,13 +67,14 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 		function drawCells(tr, data)
 		{
 
-			self.keys.forEach(function (key)
+			for(var i = 0; i < self.keys.length; i++)
 			{
+				var key = self.keys[i];
 				var td = doc.createElement('td');
 				td.width = self.widths[key];
 				td.innerHTML = '<div>' + buildCell(key, data) + '</div>';
 				tr.appendChild(td);
-			});
+			}
 		}
 
 		function buildCell(key, data)
@@ -171,30 +173,46 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 				self.sortees = disabled ? [] : [{key:key, dir:next_dir}];
 			}
 
-			sortData();
+			self.update();
 		}
 
-		function sortData()
+		function sortData(data)
 		{
 			var sort_function;
+			var ret = data.slice(0);
 
-			self.sortees.forEach(function(e, i)
+			if(self.sortees.length > 0)
 			{
-				var opts = [];
-
-				opts['direction'] = (e.dir == 'desc' ? -1 : 1);
-
-				if( i == 0 )
+				self.sortees.forEach(function(e, i)
 				{
-					sort_function = firstBy(self.sorters[e.key], opts);
-				}
-				else
-				{
-					sort_function = sort_function.thenBy(self.sorters[e.key], opts);
-				}
-			});
+					var opts = [];
 
-			self.visible_rows.sort(sort_function);
+					opts['direction'] = (e.dir == 'desc' ? -1 : 1);
+
+					if( i == 0 )
+					{
+						sort_function = firstBy(self.sorters[e.key], opts);
+					}
+					else
+					{
+						sort_function = sort_function.thenBy(self.sorters[e.key], opts);
+					}
+				});
+
+				ret.sort(sort_function);
+			}
+
+			return ret;
+		}
+
+		function filterData(data)
+		{
+			var ret = data.slice(0);
+			for(var label in self.filters)
+			{
+				ret = self.filters[label].exec(ret);
+			}
+			return ret;
 		}
 
 		self.on('mount', function ()
@@ -220,24 +238,36 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 				self.actionsCol = parseInt(opts.actions);
 			}
 
-			self.visible_rows = opts.data;
-
 			self.update();
 		});
 
 		self.on('update', function ()
 		{
 
-			sortData();
+			console.time('Updating...');
+			self.visible_rows = sortData( filterData( opts.data ) );
 			self.drawRows();
+			console.timeEnd('Updating...');
 		});
 
-		this.observable.on('filter', function(label, filter)
+		this.observable.on('filter_on', function(label, filter)
 		{
-			if(opts.filters.indexOf(label)>-1)
+			if(opts.filters.indexOf(label) > -1)
 			{
-				self.visible_rows = filter.exec(opts.data);
+				if(!self.filters[label])
+					self.filters[label] = filter;
+
 				self.update();
 			}
 		});
+
+		this.observable.on('filter_off', function(label)
+		{
+			if(opts.filters.indexOf(label) > -1 && self.filters[label])
+			{
+				delete self.filters[label];
+				self.update();
+			}
+		});
+
 });
