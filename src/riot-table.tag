@@ -102,7 +102,7 @@
 		self.drawRow = function (data, idx)
 		{
 			var tr = doc.createElement('tr');
-			tr.id = data.id || 'tr-' + idx;
+			tr.id = 'tr-' + (data.id || idx);
 
 			// // mock-up riot's e.item object (since no dom-loop)
 			// tr.onclick = function (e)
@@ -111,9 +111,9 @@
 			// 	self.onRowClick(e);
 			// };
 
-			tr.onclick = function () {
+			tr.onclick = function (e) {
 				v = data[opts.onrowclickdata];
-				opts.onrowclick(v);
+				opts.onrowclick(e, tr, v);
 			};
 
 			drawCells(tr, data);
