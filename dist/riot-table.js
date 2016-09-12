@@ -253,7 +253,7 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 			{
 				self.visible_rows = sortData( filterData( opts.data ) );
 				self.drawRows();
-				if(self.onupdate)
+				if(opts.onupdate)
 				{
 					opts.onupdate();
 				}
