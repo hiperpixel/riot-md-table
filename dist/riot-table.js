@@ -255,7 +255,7 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 				self.drawRows();
 				if(self.onupdate)
 				{
-					self.onupdate();
+					opts.onupdate();
 				}
 			}
 

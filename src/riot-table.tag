@@ -350,7 +350,7 @@
 				self.drawRows();
 				if(self.onupdate)
 				{
-					self.onupdate();
+					opts.onupdate();
 				}
 			}
 			// console.timeEnd('Updating...');
