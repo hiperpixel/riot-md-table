@@ -104,11 +104,16 @@
 			var tr = doc.createElement('tr');
 			tr.id = data.id || 'tr-' + idx;
 
-			// mock-up riot's e.item object (since no dom-loop)
-			tr.onclick = function (e)
-			{
-				e.item = this;
-				self.onRowClick(e);
+			// // mock-up riot's e.item object (since no dom-loop)
+			// tr.onclick = function (e)
+			// {
+			// 	e.item = this;
+			// 	self.onRowClick(e);
+			// };
+
+			tr.onclick = function () {
+				v = data[opts.onrowclickdata];
+				opts.onrowclick(v);
 			};
 
 			drawCells(tr, data);

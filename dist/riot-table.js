@@ -53,10 +53,9 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 			var tr = doc.createElement('tr');
 			tr.id = data.id || 'tr-' + idx;
 
-			tr.onclick = function (e)
-			{
-				e.item = this;
-				self.onRowClick(e);
+			tr.onclick = function () {
+				v = data[opts.onrowclickdata];
+				opts.onrowclick(v);
 			};
 
 			drawCells(tr, data);
