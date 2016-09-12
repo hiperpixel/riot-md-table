@@ -343,13 +343,17 @@
 		{
 			// TODO find a way to prevent too many unecessary draws
 			// NOTE is self.visible_rows really necessary?
-			console.time('Updating...');
+			// console.time('Updating...');
 			if(opts.data)
 			{
 				self.visible_rows = sortData( filterData( opts.data ) );
 				self.drawRows();
+				if(self.onupdate)
+				{
+					self.onupdate();
+				}
 			}
-			console.timeEnd('Updating...');
+			// console.timeEnd('Updating...');
 		});
 
 		function attachPlugin(collection, allowed, key, value, forceUpdate)

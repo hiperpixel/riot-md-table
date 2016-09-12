@@ -249,13 +249,16 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 		self.on('update', function ()
 		{
 
-			console.time('Updating...');
 			if(opts.data)
 			{
 				self.visible_rows = sortData( filterData( opts.data ) );
 				self.drawRows();
+				if(self.onupdate)
+				{
+					self.onupdate();
+				}
 			}
-			console.timeEnd('Updating...');
+
 		});
 
 		function attachPlugin(collection, allowed, key, value, forceUpdate)
