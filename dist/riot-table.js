@@ -176,41 +176,49 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 
 		function sortData(data)
 		{
-			var sort_function;
-			var ret = data.slice(0);
-
-			if(self.sortees.length > 0)
+			if(data)
 			{
-				self.sortees.forEach(function(e, i)
+				var sort_function;
+				var ret = data.slice(0);
+
+				if(self.sortees.length > 0)
 				{
-					var opts = [];
-
-					opts['direction'] = (e.dir == 'desc' ? -1 : 1);
-
-					if( i == 0 )
+					self.sortees.forEach(function(e, i)
 					{
-						sort_function = firstBy(self.sorters[e.key], opts);
-					}
-					else
-					{
-						sort_function = sort_function.thenBy(self.sorters[e.key], opts);
-					}
-				});
+						var opts = [];
 
-				ret.sort(sort_function);
+						opts['direction'] = (e.dir == 'desc' ? -1 : 1);
+
+						if( i == 0 )
+						{
+							sort_function = firstBy(self.sorters[e.key], opts);
+						}
+						else
+						{
+							sort_function = sort_function.thenBy(self.sorters[e.key], opts);
+						}
+					});
+
+					ret.sort(sort_function);
+				}
+
+				return ret;
 			}
-
-			return ret;
+			return data;
 		}
 
 		function filterData(data)
 		{
-			var ret = data.slice(0);
-			for(var label in self.filters)
+			if(data)
 			{
-				ret = self.filters[label].exec(ret);
+				var ret = data.slice(0);
+				for(var label in self.filters)
+				{
+					ret = self.filters[label].exec(ret);
+				}
+				return ret;
 			}
-			return ret;
+			return data;
 		}
 
 		self.on('mount', function ()
@@ -243,29 +251,61 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 		{
 
 			console.time('Updating...');
-			self.visible_rows = sortData( filterData( opts.data ) );
-			self.drawRows();
+			if(opts.data)
+			{
+				self.visible_rows = sortData( filterData( opts.data ) );
+				self.drawRows();
+			}
 			console.timeEnd('Updating...');
 		});
 
+		function attachPlugin(collection, allowed, key, value, forceUpdate)
+		{
+			forceUpdate = forceUpdate || true;
+			if(allowed.indexOf(key) > -1)
+			{
+				if(!collection[key])
+					collection[key] = value;
+
+				if (forceUpdate)
+					self.update();
+			}
+		}
+		function detachPlugin(collection, allowed, key, forceUpdate)
+		{
+			forceUpdate = forceUpdate || true;
+			if(allowed.indexOf(key) > -1 && collection[key])
+			{
+				delete collection[key];
+
+				if (forceUpdate)
+					self.update();
+			}
+		}
+
 		this.observable.on('filter_on', function(label, filter)
 		{
-			if(opts.filters.indexOf(label) > -1)
-			{
-				if(!self.filters[label])
-					self.filters[label] = filter;
-
-				self.update();
-			}
+			attachPlugin(self.filters, opts.filters, label, filter, true);
 		});
 
 		this.observable.on('filter_off', function(label)
 		{
-			if(opts.filters.indexOf(label) > -1 && self.filters[label])
-			{
-				delete self.filters[label];
-				self.update();
-			}
+			detachPlugin(self.filters, opts.filters, label, true);
+		});
+
+		this.observable.on('pagination_on', function(label, paginator)
+		{
+			attachPlugin(self.paginators, opts.paginators, label, paginator, false);
+		});
+
+		this.observable.on('pagination_exec', function(label, paginator)
+		{
+			console.log('receiving a execution request!');
+		});
+
+		this.observable.on('pagination_off', function(label)
+		{
+			detachPlugin(self.paginators, opts.paginators, label, false);
 		});
 
 });
