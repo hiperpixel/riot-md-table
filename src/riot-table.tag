@@ -111,10 +111,14 @@
 			// 	self.onRowClick(e);
 			// };
 
-			tr.onclick = function (e) {
-				v = data[opts.onrowclickdata];
-				opts.onrowclick(e, tr, v);
-			};
+			if(opts.onrowclick)
+			{
+				tr.onclick = function (e)
+				{
+					v = data[opts.onrowclickdata];
+					opts.onrowclick(e, tr, v);
+				};
+			}
 
 			drawCells(tr, data);
 
@@ -133,9 +137,13 @@
 			for(var i = 0; i < self.keys.length; i++)
 			{
 				var key = self.keys[i];
+				var cell = buildCell(key, data);
 				var td = doc.createElement('td');
 				td.width = self.widths[key];
-				td.innerHTML = '<div>' + buildCell(key, data) + '</div>';
+
+				if ( typeof cell == 'object' ) { td.appendChild( cell ); }
+				else { td.innerHTML = '<div>' + cell + '</div>'; }
+
 				tr.appendChild(td); // add this `<td>` to the `<tr>`
 			}
 		}

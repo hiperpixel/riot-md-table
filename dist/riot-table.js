@@ -53,10 +53,14 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 			var tr = doc.createElement('tr');
 			tr.id = 'tr-' + (data.id || idx);
 
-			tr.onclick = function (e) {
-				v = data[opts.onrowclickdata];
-				opts.onrowclick(e, tr, v);
-			};
+			if(opts.onrowclick)
+			{
+				tr.onclick = function (e)
+				{
+					v = data[opts.onrowclickdata];
+					opts.onrowclick(e, tr, v);
+				};
+			}
 
 			drawCells(tr, data);
 
@@ -69,9 +73,13 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 			for(var i = 0; i < self.keys.length; i++)
 			{
 				var key = self.keys[i];
+				var cell = buildCell(key, data);
 				var td = doc.createElement('td');
 				td.width = self.widths[key];
-				td.innerHTML = '<div>' + buildCell(key, data) + '</div>';
+
+				if ( typeof cell == 'object' ) { td.appendChild( cell ); }
+				else { td.innerHTML = '<div>' + cell + '</div>'; }
+
 				tr.appendChild(td);
 			}
 		}
