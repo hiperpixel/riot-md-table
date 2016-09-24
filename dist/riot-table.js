@@ -15,6 +15,7 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 		self.visible_rows = [];
 		self.sortees = [];
 		self.filters = [];
+		self.events = riot.observable();
 
 		self.idOfSortee = function (key)
 		{
@@ -51,7 +52,7 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 		self.drawRow = function (data, idx)
 		{
 			var tr = doc.createElement('tr');
-			tr.id = 'tr-' + (data.id || idx);
+			tr.id = (opts.prefix || 'tr') + '-' + (data.id || idx);
 
 			if(opts.onrowclick)
 			{
@@ -266,6 +267,8 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 					opts.onupdate();
 				}
 			}
+
+			self.events.trigger('update');
 
 		});
 

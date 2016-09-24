@@ -48,6 +48,7 @@
 		self.visible_rows = []; // data to display
 		self.sortees = []; // what columns to sort
 		self.filters = []; // enabled filters list
+		self.events = riot.observable(); // events
 
 		/**
 		* Get the id of the column in the sortee array
@@ -102,7 +103,7 @@
 		self.drawRow = function (data, idx)
 		{
 			var tr = doc.createElement('tr');
-			tr.id = 'tr-' + (data.id || idx);
+			tr.id = (opts.prefix || 'tr') + '-' + (data.id || idx);
 
 			// // mock-up riot's e.item object (since no dom-loop)
 			// tr.onclick = function (e)
@@ -361,6 +362,8 @@
 					opts.onupdate();
 				}
 			}
+
+			self.events.trigger('update');
 			// console.timeEnd('Updating...');
 		});
 
@@ -390,7 +393,7 @@
 
 		this.observable.on('filter_on', function(label, filter)
 		{
-			attachPlugin(self.filters, opts.filters, label, filter, true);
+			attachPlugin(self.filters, self.opts.filters, label, filter, true);
 		});
 
 		this.observable.on('filter_off', function(label)
@@ -398,20 +401,23 @@
 			detachPlugin(self.filters, opts.filters, label, true);
 		});
 
-		this.observable.on('pagination_on', function(label, paginator)
-		{
-			attachPlugin(self.paginators, opts.paginators, label, paginator, false);
-		});
+		// this.observable.on('pagination_on', function(label, paginator)
+		// {
+		// 	attachPlugin(self.paginators, opts.paginators, label, paginator, false);
+		// });
+		//
+		// this.observable.on('pagination_exec', function(label, paginator)
+		// {
+		// 	console.log('receiving a execution request!');
+		// });
+		//
+		// this.observable.on('pagination_off', function(label)
+		// {
+		// 	detachPlugin(self.paginators, opts.paginators, label, false);
+		// });
 
-		this.observable.on('pagination_exec', function(label, paginator)
-		{
-			console.log('receiving a execution request!');
-		});
-
-		this.observable.on('pagination_off', function(label)
-		{
-			detachPlugin(self.paginators, opts.paginators, label, false);
-		});
-
+		this.on('before-unmount', function() {
+			this.observable.off('*');
+		})
 	</script>
 </riot-table>
