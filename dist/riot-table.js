@@ -1,4 +1,4 @@
-riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" onkeyup="{onKeyup}"> <table name="el" class="{opts.class}"> <thead> <tr name="labels"> <th each="{c in tags[\'riot-table-col\']}" onclick="{c.opts.sorter ? sortColumn : \'\'}" data-order="{c.opts.sorter ? c.opts.order || \'asc\' : \'\'}" data-key="{c.opts.key}" riot-style="width: {c.opts.width || \'auto\'}" class="{c.opts.sorter ? \'sortable\': \'\'}"> {c.opts.label} <span class="sort_dir" if="{c.parent.keyIsSortee(c.opts.key)}"> <span class="dir_{c.parent.dirOfSortee(c.opts.key)}"> <span>{c.parent.dirOfSortee(c.opts.key)}</span> </span> <span class="order" if="{c.parent.opts.multicolumn}"> <span>{c.parent.idOfSortee(c.opts.key) + 1}</span> </span> </span> </th> </tr> </thead> <tbody name="tbody"></tbody> </table>', '', '', function(opts) {
+riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" onkeyup="{onKeyup}"> <table name="el" class="{opts.class}"> <thead> <tr name="labels"> <th each="{c in tags[\'riot-table-col\']}" onclick="{c.opts.sorter ? sortColumn : \'\'}" data-order="{c.opts.sorter ? c.opts.order || \'asc\' : \'\'}" data-key="{c.opts.key}" riot-style="width: {c.opts.width || \'auto\'}" class="{c.opts.sorter ? \'sortable\': \'\'}" if="{!(\'if\' in c.opts) || c.opts.if}"> {c.opts.label} <span class="sort_dir" if="{c.parent.keyIsSortee(c.opts.key)}"> <span class="dir_{c.parent.dirOfSortee(c.opts.key)}"> <span>{c.parent.dirOfSortee(c.opts.key)}</span> </span> <span class="order" if="{c.parent.opts.multicolumn}"> <span>{c.parent.idOfSortee(c.opts.key) + 1}</span> </span> </span> </th> </tr> </thead> <tbody name="tbody"></tbody> </table>', '', '', function(opts) {
 		this.mixin(EventHub);
 
 		var self = this,
@@ -235,16 +235,19 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 
 			self.tags['riot-table-col'].forEach(function (c)
 			{
-				var k = c.opts.key;
+				if( !('if' in c.opts) || c.opts.if )
+				{
+					var k = c.opts.key;
 
-				self.keys.push(k);
-				self.widths[k] = c.opts.width || 'auto';
+					self.keys.push(k);
+					self.widths[k] = c.opts.width || 'auto';
 
-				self.builders[k] = c.opts.render || false;
+					self.builders[k] = c.opts.render || false;
 
-				self.sorters[k] = c.opts.sorter || false;
+					self.sorters[k] = c.opts.sorter || false;
 
-				self.root.removeChild(c.root);
+					self.root.removeChild(c.root);
+				}
 			});
 
 			if (opts.actions)
@@ -298,7 +301,7 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 
 		this.observable.on('filter_on', function(label, filter)
 		{
-			attachPlugin(self.filters, opts.filters, label, filter, true);
+			attachPlugin(self.filters, self.opts.filters, label, filter, true);
 		});
 
 		this.observable.on('filter_off', function(label)
@@ -306,19 +309,7 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 			detachPlugin(self.filters, opts.filters, label, true);
 		});
 
-		this.observable.on('pagination_on', function(label, paginator)
-		{
-			attachPlugin(self.paginators, opts.paginators, label, paginator, false);
-		});
-
-		this.observable.on('pagination_exec', function(label, paginator)
-		{
-			console.log('receiving a execution request!');
-		});
-
-		this.observable.on('pagination_off', function(label)
-		{
-			detachPlugin(self.paginators, opts.paginators, label, false);
-		});
-
+		this.on('before-unmount', function() {
+			this.observable.off('*');
+		})
 });

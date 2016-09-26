@@ -9,7 +9,8 @@
 				<th each="{ c in tags['riot-table-col'] }" onclick="{ c.opts.sorter ? sortColumn : ''}"
 					data-order="{ c.opts.sorter ? c.opts.order || 'asc' : '' }"
 					data-key="{ c.opts.key }" style="width: { c.opts.width || 'auto' }"
-					class="{c.opts.sorter ? 'sortable': '' }">
+					class="{c.opts.sorter ? 'sortable': '' }"
+					if="{ !('if' in c.opts) || c.opts.if }">
 					{ c.opts.label }
 					<span class="sort_dir" if="{ c.parent.keyIsSortee(c.opts.key) }">
 						<span class="dir_{ c.parent.dirOfSortee(c.opts.key) }">
@@ -322,18 +323,21 @@
 			// save the columns' datakeys & widths. will be used for `<td>` childs
 			self.tags['riot-table-col'].forEach(function (c)
 			{
-				var k = c.opts.key;
+				if( !('if' in c.opts) || c.opts.if )
+				{
+					var k = c.opts.key;
 
-				self.keys.push(k);
-				self.widths[k] = c.opts.width || 'auto';
+					self.keys.push(k);
+					self.widths[k] = c.opts.width || 'auto';
 
-				// has a custom renderer?
-				self.builders[k] = c.opts.render || false;
-				// has a sorter method?
-				self.sorters[k] = c.opts.sorter || false;
+					// has a custom renderer?
+					self.builders[k] = c.opts.render || false;
+					// has a sorter method?
+					self.sorters[k] = c.opts.sorter || false;
 
-				// remove the `<riot-table-col>` tags from DOM, useless now
-				self.root.removeChild(c.root);
+					// remove the `<riot-table-col>` tags from DOM, useless now
+					self.root.removeChild(c.root);
+				}
 			});
 
 			// check if there's an Actions column
