@@ -40,7 +40,6 @@
             {
                 if (this['_active'].checked)
                 {
-                    console.log(e[this.opts.key], this.getValue(this[opts.as].value));
                     return e[this.opts.key] === this.getValue(this[opts.as].value);
                 }
                 return true;

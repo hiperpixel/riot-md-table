@@ -29,7 +29,6 @@ riot.tag2('riot-table-filter-select', '<div class="filter"> <div class="filter_a
             {
                 if (this['_active'].checked)
                 {
-                    console.log(e[this.opts.key], this.getValue(this[opts.as].value));
                     return e[this.opts.key] === this.getValue(this[opts.as].value);
                 }
                 return true;
