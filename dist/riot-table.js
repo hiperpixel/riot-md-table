@@ -245,8 +245,6 @@ riot.tag2('riot-table', '<yield></yield> <input if="{opts.search}" type="text" o
 					self.builders[k] = c.opts.render || false;
 
 					self.sorters[k] = c.opts.sorter || false;
-
-					self.root.removeChild(c.root);
 				}
 			});
 

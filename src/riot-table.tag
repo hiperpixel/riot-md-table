@@ -334,9 +334,6 @@
 					self.builders[k] = c.opts.render || false;
 					// has a sorter method?
 					self.sorters[k] = c.opts.sorter || false;
-
-					// remove the `<riot-table-col>` tags from DOM, useless now
-					self.root.removeChild(c.root);
 				}
 			});
 
